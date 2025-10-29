@@ -10,16 +10,28 @@ int buscarMenor(int a[], int i, int tam);
 void llenarArchivo(char nombre[]);
 void mostrarArchivo(char nombre[]);
 int buscarMenorArchivo(char nombre[]);
-void invertirArchivo(char nombre[]);
+void invertirArchivo(char nombre[], int inicio, int ultimo);
+void mostrarArchivoInvertido (char nombre[], int a);
+void mostrarInverso();
+void arregloCondicion(int arr[], int condicion, int i, int tam);
+int sumarDigitos (int num);
+int sumarCantDigitos (int num);
+int esPrimo (int num, int div);
+int contarMayores(int arr[], int condicion, int i, int tam);
+void invertirDigitos(int num);
+
 
 int main()
 {
-    int a[] = {3,2,3,5,7,6,10,8};
+    int a[] = {1,2,3,4,5};
     int tam = sizeof(a) / sizeof(a[0]);
     int rta;
     char arch[] = "archivito.bin";
-    mostrarArchivo(arch);
-
+    FILE *archi = fopen("archivito.bin", "rb");
+    fseek(archi, 0, SEEK_END);  // Ir al final
+    int cant = ftell(archi) / sizeof(int);
+    fclose(archi);  // Cerrar archivo
+    invertirDigitos(123);
 }
 
 ///Ejercicios///
@@ -194,34 +206,161 @@ void mostrarArchivo(char nombre[])
 }
 
 /* 9 */
-void invertirArchivo(char nombre[])
+void invertirArchivo(char nombre[], int inicio, int ultimo)
 {
     FILE *arch = fopen(nombre, "r+b");
-    int num;
-
-    if(arch == NULL)
+    if(inicio >= ultimo)
     {
-        printf("Error al abrir el archivo\n");
+        printf("\n Archivo invertido correctamente");
         return;
     }
 
-    // Intenta leer un número
-    if(fread(&num, sizeof(int), 1, arch) == 1)
-    {
-        // Guarda la posición actual antes de la llamada recursiva
-        long pos = ftell(arch);
-        fclose(arch);
-        // Llamada recursiva
-        invertirArchivo(nombre);
+    int a,b;
 
-        // Regresa a la posición y escribe el número
-        arch = fopen(nombre, "r+b");
-        fseek(arch, pos, SEEK_SET);
-        fwrite(&num, sizeof(int), 1, arch);
-        fclose(arch);
+    // posicionarse en el primer registro y leer
+    fseek(arch,inicio * sizeof(int),SEEK_SET);
+    fread(&a,sizeof(int),1,arch);
+
+    // posicionarse en el ultimo registro y leer
+    fseek(arch,ultimo * sizeof(int),SEEK_SET);
+    fread(&b,sizeof(int),1,arch);
+
+    // moverse e intercambiar
+    fseek(arch,inicio * sizeof(int),SEEK_SET);
+    fwrite(&b, sizeof(int),1,arch);
+
+    fseek(arch,ultimo * sizeof(int),SEEK_SET);
+    fwrite(&a, sizeof(int),1,arch);
+
+    fclose(arch);
+
+    invertirArchivo(nombre, inicio + 1, ultimo - 1);
+}
+
+/* 10 Mostrar contenido de archivo de forma invertida */
+void mostrarArchivoInvertido (char nombre[], int inicio)
+{
+    FILE *arch = fopen(nombre, "rb");
+    int aux;
+
+    if(arch != NULL)
+    {
+        fseek(arch, inicio * sizeof(int), SEEK_SET);
+        if(fread(&aux, sizeof(int), 1, arch) > 0)
+        {
+            fclose(arch);
+            mostrarArchivoInvertido(nombre, inicio + 1);
+            printf("\n%d",aux);
+
+        }
+        else
+        {
+            fclose(arch);
+        }
+    }
+
+}
+
+/* 11 Mostrar de manera inversa los caracteres hasta que haya un * */
+void mostrarInverso()
+{
+    char c;
+    printf("Ingrese un caracter, si desea finalizar ingrese *:\n");
+    fflush(stdin);
+    scanf("%c", &c);
+
+    if(c == '*')
+    {
+        return;
+    }
+
+    mostrarInverso();
+    printf("%c", c);
+}
+
+/* 12 Determinar si un arreglo tiene determinado elemento */
+void arregloCondicion(int arr[], int condicion, int i, int tam)
+{
+    if(i<tam)
+    {
+        if(arr[i] == condicion)
+        {
+            printf("El arreglo contiene el elemento.");
+        }
+        else
+        {
+            arregloCondicion(arr, condicion, i+1, tam);
+
+        }
+    }
+}
+
+/* 13 Sumar digitos de un numero */
+int sumarDigitos (int num)
+{
+    if(num == 0)
+    {
+        return 0;
     }
     else
     {
-        fclose(arch);
+        return (num%10) +sumarDigitos(num/10);
     }
+}
+
+/* 14 Sumar cantidad de digitos */
+int sumarCantDigitos (int num)
+{
+    int cont = 0;
+    if(num == 0)
+    {
+        return 0;
+    }
+    else
+    {
+        return (cont+1) + sumarCantDigitos(num/10);
+    }
+}
+
+/* 15 Indicar si es primo */
+int esPrimo (int num, int div)
+{
+    if(num == div)
+    {
+        return 1;
+    } else if (num % div == 0 && div != 1)
+    {
+        return 0;
+    }
+    else
+    {
+        return esPrimo(num, div+1);
+    }
+}
+
+/* 16 Contar los numeros mayores a uno pasado como parametro de un arreglo */
+int contarMayores(int arr[], int condicion, int i, int tam)
+{
+    if(i == tam)
+    {
+        return 0;
+    }
+    if(arr[i] > condicion)
+    {
+        return 1 + contarMayores(arr, condicion, i+1, tam);
+    }else
+    {
+    return contarMayores(arr, condicion, i+1, tam);
+    }
+}
+
+/* 17 Invertir digitos de un numero */
+void invertirDigitos(int num)
+{
+    if(num % 10 == 0)
+    {
+        return;
+    }
+    printf("%d",num%10);
+    invertirDigitos(num/10);
 }
